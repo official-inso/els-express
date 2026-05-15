@@ -5,9 +5,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org/)
 [![license MIT](https://img.shields.io/npm/l/@inso_web/els-express.svg)](./LICENSE)
 
-Express middleware for the **Inso Error Logs Service (ELS)** — a managed SaaS for centralised error and event logging with AI-assisted triage. Adds `req.log`, automatic request logging, and an error handler that ships unhandled exceptions to ELS. Drop-in replacement for `pino-http` + `morgan` + Sentry's Express middleware with **zero runtime dependencies**.
+Express middleware for the **Inso Error Logs Service (ELS)** — a managed SaaS for centralised event logging (debug → fatal) with AI-assisted error triage. Adds `req.log`, automatic request logging, and an error handler that ships unhandled exceptions to ELS. Drop-in replacement for `pino-http` + `morgan` + Sentry's Express middleware with **zero runtime dependencies**.
 
-> 🇷🇺 [Русская версия → README_RU.md](README_RU.md) &nbsp;•&nbsp; 📚 [SDKs overview → ../README.md](../README.md)
+> 🇷🇺 [Русская версия → README_RU.md](README_RU.md)
 
 ---
 
@@ -36,11 +36,14 @@ Express middleware for the **Inso Error Logs Service (ELS)** — a managed SaaS 
 
 ## What you get
 
-A built-in dashboard with full-text search, faceted filtering, AI-assisted diagnosis, and a regressions-by-version widget.
+ELS ships with a built-in admin dashboard. Every event captured by this SDK lands there with full-text search, faceted filtering, AI-assisted diagnosis, and version-aware regression detection.
 
-![ELS dashboard preview](https://raw.githubusercontent.com/official-inso/els-go/main/docs/screenshots/01-error-logs-list.png)
-
-→ **[Full UI tour with all 4 screenshots](../README.md#what-you-get)**
+| | |
+|---|---|
+| ![Logs list](https://raw.githubusercontent.com/official-inso/els-go/main/docs/screenshots/01-error-logs-list.png) | ![Event detail](https://raw.githubusercontent.com/official-inso/els-go/main/docs/screenshots/02-event-detail-info.png) |
+| Virtual table with facet sidebar (app, env, **version**, source, level, browser, IP, category). Live mode auto-refreshes every 5s. | Full event metadata: timestamps, geo, env, **app version**, fingerprint, session, repetition cards, in-session correlation. |
+| ![AI diagnosis](https://raw.githubusercontent.com/official-inso/els-go/main/docs/screenshots/03-error-detail-ai.png) | ![Analytics](https://raw.githubusercontent.com/official-inso/els-go/main/docs/screenshots/04-analytics-dashboard.png) |
+| Parsed stack trace + AI-assisted diagnosis: what broke, where, how to fix. | Timeline, donuts, top URLs/IPs, hourly heatmap, **version-regression widget**. |
 
 ---
 
@@ -378,14 +381,29 @@ ELS for Node.js is a focused logging SaaS, not a full observability suite. It op
 - **5-minute integration.** Install → set API key → done.
 - **Predictable price.** Tariffs live in the dashboard.
 
-| Feature | ELS | Sentry | Datadog | Loki | LogRocket |
-|---|---|---|---|---|---|
-| AI on stack traces | Built-in | Paid add-on | Paid add-on | None | None |
-| Zero-dep SDK | Yes | No | No | No | No |
-| Free tier retention | 24h | 30d (limited) | Trial only | Self-cost | 3–30d |
-| Setup time | ~5 min | 10–20 min | 30–60 min | Hours | 10–20 min |
+### Detailed comparison
 
-ELS does **not** ship full APM / tracing, source-map upload, session replay, frontend RUM, or infra metrics. If any of those is critical — pair ELS with Grafana / Datadog or stay on Sentry.
+| Category | ELS | Sentry | Datadog / New Relic | Grafana Loki | LogRocket / Logtail / BetterStack |
+|---|---|---|---|---|---|
+| Hosting model | Managed SaaS | SaaS or self-hosted | SaaS only | Self-hosted / Grafana Cloud | SaaS |
+| SDK runtime deps | Zero | Medium (sub-SDKs, integrations) | Heavy (agent + tracing) | Promtail / agent | Medium |
+| Typical integration time | ~5 min | 10–20 min | 30–60 min | Hours to days | 10–20 min |
+| AI-assisted triage | Built-in | Paid add-on | Paid add-on | None | None |
+| Error grouping / fingerprint | Yes | Yes | Yes | Manual via LogQL | Partial |
+| Source-map upload | No | Yes | Yes | n/a | Partial |
+| Session replay (frontend) | No | Paid | Paid | n/a | Yes (core) |
+| Distributed tracing / APM | No | Partial | Yes (core) | Yes with Tempo | No |
+| Infrastructure metrics | No | No | Yes (core) | Yes with Mimir | No |
+| Free tier log retention | 24 hours | 30 days (limited volume) | Trial only | Self-cost | 3–30 days |
+| Russian-language support / docs | Native | Community | Limited | Community | None |
+
+### When ELS is the wrong choice
+
+- You need a single vendor for **APM + logs + metrics** under one bill — go Datadog or New Relic.
+- Your frontend bug triage relies on **DOM session replay** — go LogRocket or Sentry Replay.
+- You ship a **public mobile app** and need crash symbolication + ANR detection — Firebase Crashlytics or Sentry Mobile.
+
+For everything else — backend errors, frontend JS errors, request logs, structured app events with version-aware analytics — ELS is built to be the cheapest path to a working dashboard.
 
 → **Sign up at [lk.insoweb.ru](https://lk.insoweb.ru)** to grab an API key.
 
@@ -428,7 +446,7 @@ function createELSExpressLogger(opts: {
 function createELSErrorHandler(client: ELSClient): express.ErrorRequestHandler;
 ```
 
-Full `ELSConfig` reference — see [@inso_web/els-client](../js/README.md).
+Full `ELSConfig` reference — see [@inso_web/els-client](https://github.com/official-inso/els-client).
 
 ---
 
@@ -437,19 +455,17 @@ Full `ELSConfig` reference — see [@inso_web/els-client](../js/README.md).
 Same wire format, same dashboard — pick by stack.
 
 **Node.js family**
-- [`@inso_web/els-client`](../js/README.md) — base TS / Node / browser client
-- [`@inso_web/els-express`](../express/README.md) — Express middleware (this package)
-- [`@inso_web/els-next`](../next/README.md) — Next.js helpers (App + Pages router)
-- [`@inso_web/els-nest`](../nest/README.md) — NestJS module
-- [`@inso_web/els-react`](../react/README.md) — React Provider, hooks, ErrorBoundary
-- [`@inso_web/els-vue`](../vue/README.md) — Vue 3 plugin
+- [`@inso_web/els-client`](https://github.com/official-inso/els-client) — base TS / Node / browser client
+- [`@inso_web/els-express`](https://github.com/official-inso/els-express) — Express middleware (this repo)
+- [`@inso_web/els-next`](https://github.com/official-inso/els-next) — Next.js helpers (App + Pages router)
+- [`@inso_web/els-nest`](https://github.com/official-inso/els-nest) — NestJS module
+- [`@inso_web/els-react`](https://github.com/official-inso/els-react) — React Provider, hooks, ErrorBoundary
+- [`@inso_web/els-vue`](https://github.com/official-inso/els-vue) — Vue 3 plugin
 
 **Other stacks**
-- [`Inso.Els`](../csharp/README.md) — .NET (Core + ASP.NET Core + ILogger)
-- [`io.github.official-inso:els-core`](../java/README.md) — Java + Spring Boot starter + SLF4J
-- [`github.com/official-inso/els-go`](../els-go/README.md) — Go
-
-→ **Full overview & comparison:** [../README.md](../README.md) · [github.com/official-inso/els-go/blob/main/sdks/README.md](https://github.com/official-inso/els-go/blob/main/sdks/README.md)
+- [`Inso.Els`](https://github.com/official-inso/els-csharp) — .NET (Core + ASP.NET Core + ILogger)
+- [`io.github.official-inso:els-core`](https://github.com/official-inso/els-java) — Java + Spring Boot starter + SLF4J
+- [`github.com/official-inso/els-go`](https://github.com/official-inso/els-go) — Go
 
 ---
 
