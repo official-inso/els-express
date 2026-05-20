@@ -16,7 +16,6 @@ import {
 } from "@inso_web/els-express";
 
 const log = new ELSClient({
-  endpoint: process.env.ELS_URL || "https://api.insoweb.ru/els",
   apiKey: process.env.ELS_API_KEY || "els_live_xxxxxxxx",
   appSlug: "examples",
   serviceName: "express-basic",

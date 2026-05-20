@@ -18,16 +18,17 @@ declare global {
   }
 }
 
+/** Options for {@link createELSExpressLogger}. */
 export interface ELSExpressOptions {
-  /** Инстанс ELSClient — он же логгер */
+  /** The ELS client (which is also the logger). */
   client: ELSClient;
-  /** Генератор request id, по умолчанию UUID v4 */
+  /** Request-id generator. Default: UUID v4. */
   genReqId?: (req: Request) => string;
-  /** Имя HTTP заголовка для request id (default 'x-request-id') */
+  /** HTTP header carrying the request id. Default: `'x-request-id'`. */
   reqIdHeader?: string;
-  /** Логировать ли каждый завершённый request (default true) */
+  /** Auto-log every finished request. Default: `true`. */
   autoLogRequests?: boolean;
-  /** Не логировать пути по списку строк или regex */
+  /** Skip logging for these paths (exact strings or regexes). */
   ignorePaths?: (string | RegExp)[];
 }
 
@@ -37,7 +38,7 @@ export interface ELSExpressOptions {
  *
  * @example
  * import { ELSClient, createELSExpressLogger } from '@inso_web/els-express';
- * const log = new ELSClient({ endpoint, apiKey, appSlug });
+ * const log = new ELSClient({ apiKey, appSlug });
  * app.use(createELSExpressLogger({ client: log }));
  * app.get('/users/:id', (req, res) => {
  *   req.log.info({ userId: req.params.id }, 'Fetching user');
@@ -69,6 +70,10 @@ export function createELSExpressLogger(opts: ELSExpressOptions): RequestHandler 
       method: req.method,
       url: req.originalUrl,
       ip: req.ip,
+      // Auto-extract request context — these keys map to ErrorEntry fields.
+      userAgent: req.headers["user-agent"],
+      referrer: req.headers["referer"],
+      language: req.headers["accept-language"],
     });
 
     if (autoLog) {

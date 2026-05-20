@@ -23,7 +23,6 @@ describe("Express middleware", () => {
     vi.stubGlobal("fetch", fetchMock);
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     client = new ELSClient({
-      endpoint: "https://example.test",
       apiKey: "test-key",
       appSlug: "test-app",
     });
@@ -91,6 +90,24 @@ describe("Express middleware", () => {
       return body.level === "error";
     });
     expect(errorCall).toBeDefined();
+  });
+
+  it("auto-extracts userAgent/referrer/language from request headers", async () => {
+    const app = express();
+    app.use(createELSExpressLogger({ client, autoLogRequests: true }));
+    app.get("/u", (_req, res) => res.json({ ok: true }));
+    await request(app)
+      .get("/u")
+      .set("user-agent", "Mozilla/5.0 Chrome/124")
+      .set("referer", "https://ref.example")
+      .set("accept-language", "en-US");
+    await new Promise((r) => setTimeout(r, 30));
+    const call = fetchMock.mock.calls.find((c) => String(c[0]).endsWith("/errors"));
+    expect(call).toBeDefined();
+    const body = JSON.parse((call![1] as any).body);
+    expect(body.userAgent).toBe("Mozilla/5.0 Chrome/124");
+    expect(body.referrer).toBe("https://ref.example");
+    expect(body.language).toBe("en-US");
   });
 
   it("ignorePaths skips middleware", async () => {
