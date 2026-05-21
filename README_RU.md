@@ -67,7 +67,6 @@ import { ELSClient } from '@inso_web/els-client';
 import { createELSExpressLogger, createELSErrorHandler } from '@inso_web/els-express';
 
 const client = new ELSClient({
-  endpoint: 'https://api.insoweb.ru/els',
   apiKey: process.env.ELS_API_KEY!,
   appSlug: 'my-app',
   serviceName: 'api',
@@ -198,7 +197,7 @@ import express from 'express';
 import { ELSClient } from '@inso_web/els-client';
 import { createELSExpressLogger } from '@inso_web/els-express';
 
-const client = new ELSClient({ endpoint, apiKey, appSlug: 'my-app' });
+const client = new ELSClient({ apiKey, appSlug: 'my-app' });
 const app = express();
 app.use(createELSExpressLogger({
   client,
@@ -250,7 +249,7 @@ import express from 'express';
 import { ELSClient } from '@inso_web/els-client';
 import { createELSExpressLogger } from '@inso_web/els-express';
 
-const client = new ELSClient({ endpoint, apiKey, appSlug: 'my-app', minLevel: 'info' });
+const client = new ELSClient({ apiKey, appSlug: 'my-app', minLevel: 'info' });
 const app = express();
 app.use(createELSExpressLogger({ client }));
 
@@ -304,7 +303,6 @@ import { ELSClient } from '@inso_web/els-client';
 import { createELSExpressLogger, createELSErrorHandler } from '@inso_web/els-express';
 
 const client = new ELSClient({
-  endpoint: 'https://api.insoweb.ru/els',
   apiKey: process.env.ELS_API_KEY!,
   appSlug: 'my-app',
   deploymentEnv: 'PRODUCTION',
@@ -322,7 +320,7 @@ app.use(createELSErrorHandler(client));
 | `Sentry.Handlers.requestHandler()` | `createELSExpressLogger({ client })` | Та же позиция в цепочке |
 | `Sentry.Handlers.errorHandler()` | `createELSErrorHandler(client)` | Та же позиция (последним) |
 | `Sentry.Handlers.tracingHandler()` | не предоставляется | ELS не делает tracing |
-| `dsn` | `endpoint` + `apiKey` + `appSlug` | Три явных поля |
+| `dsn` | `apiKey` + `appSlug` | Три явных поля |
 | `environment` | `deploymentEnv` | Фиксированный enum |
 | `release` | `appVersion` | Любая строка ≤128 символов |
 | Source maps upload | не предоставляется | Оставьте Sentry рядом, если критично |

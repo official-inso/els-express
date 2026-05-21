@@ -1,6 +1,6 @@
 {
   "name": "@inso_web/els-express",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Express middleware для @inso_web/els-client с request-scoped логированием (req.log) и error handler. Drop-in замена pino-http и morgan + winston.",
   "homepage": "https://api.insoweb.ru/els",
   "author": "INSOWEB",

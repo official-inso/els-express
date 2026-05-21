@@ -67,7 +67,6 @@ import { ELSClient } from '@inso_web/els-client';
 import { createELSExpressLogger, createELSErrorHandler } from '@inso_web/els-express';
 
 const client = new ELSClient({
-  endpoint: 'https://api.insoweb.ru/els',
   apiKey: process.env.ELS_API_KEY!,
   appSlug: 'my-app',
   serviceName: 'api',
@@ -198,7 +197,7 @@ import express from 'express';
 import { ELSClient } from '@inso_web/els-client';
 import { createELSExpressLogger } from '@inso_web/els-express';
 
-const client = new ELSClient({ endpoint, apiKey, appSlug: 'my-app' });
+const client = new ELSClient({ apiKey, appSlug: 'my-app' });
 const app = express();
 app.use(createELSExpressLogger({
   client,
@@ -250,7 +249,7 @@ import express from 'express';
 import { ELSClient } from '@inso_web/els-client';
 import { createELSExpressLogger } from '@inso_web/els-express';
 
-const client = new ELSClient({ endpoint, apiKey, appSlug: 'my-app', minLevel: 'info' });
+const client = new ELSClient({ apiKey, appSlug: 'my-app', minLevel: 'info' });
 const app = express();
 app.use(createELSExpressLogger({ client }));
 
@@ -304,7 +303,6 @@ import { ELSClient } from '@inso_web/els-client';
 import { createELSExpressLogger, createELSErrorHandler } from '@inso_web/els-express';
 
 const client = new ELSClient({
-  endpoint: 'https://api.insoweb.ru/els',
   apiKey: process.env.ELS_API_KEY!,
   appSlug: 'my-app',
   deploymentEnv: 'PRODUCTION',
@@ -322,7 +320,7 @@ app.use(createELSErrorHandler(client));
 | `Sentry.Handlers.requestHandler()` | `createELSExpressLogger({ client })` | Same position in the chain |
 | `Sentry.Handlers.errorHandler()` | `createELSErrorHandler(client)` | Same position (last) |
 | `Sentry.Handlers.tracingHandler()` | Not provided | ELS does not do tracing |
-| `dsn` | `endpoint` + `apiKey` + `appSlug` | Three explicit fields |
+| `dsn` | `apiKey` + `appSlug` | Three explicit fields |
 | `environment` | `deploymentEnv` | Fixed enum |
 | `release` | `appVersion` | Any string ≤128 chars |
 | Source maps upload | Not provided | Pair with Sentry if critical |
