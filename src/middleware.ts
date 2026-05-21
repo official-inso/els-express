@@ -45,6 +45,12 @@ export interface ELSExpressOptions {
  *   res.json({ ok: true });
  * });
  */
+/** Coerces an Express header value (string | string[] | undefined) to a string. */
+function headerStr(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? "";
+  return value ?? "";
+}
+
 export function createELSExpressLogger(opts: ELSExpressOptions): RequestHandler {
   const reqIdHeader = opts.reqIdHeader || "x-request-id";
   const autoLog = opts.autoLogRequests !== false;
@@ -65,15 +71,19 @@ export function createELSExpressLogger(opts: ELSExpressOptions): RequestHandler 
 
     req.id = reqId;
     res.setHeader(reqIdHeader, reqId);
+    const al = headerStr(req.headers["accept-language"]);
     req.log = opts.client.child({
       requestId: reqId,
       method: req.method,
       url: req.originalUrl,
       ip: req.ip,
       // Auto-extract request context — these keys map to ErrorEntry fields.
-      userAgent: req.headers["user-agent"],
-      referrer: req.headers["referer"],
-      language: req.headers["accept-language"],
+      // Normalize to the ELS schema limits (language ≤ 20 → first tag,
+      // userAgent ≤ 1000, referrer ≤ 2000) so a raw header never gets the
+      // whole entry rejected with a 400.
+      userAgent: headerStr(req.headers["user-agent"]).slice(0, 1000) || undefined,
+      referrer: headerStr(req.headers["referer"]).slice(0, 2000) || undefined,
+      language: al.split(",")[0]?.trim().slice(0, 20) || undefined,
     });
 
     if (autoLog) {
